@@ -26,7 +26,14 @@ for i in range(len(lines)):
 states=np.array(states)
 actions=np.array(actions)
 
+numpy_dict = {
+        'actions': actions,
+        'obs': states,
+        # 'rewards': rewards,
+        # 'episode_returns': episode_returns,
+        # 'episode_starts': episode_starts
+    }
 
-np.savez("hi", states=states, actions=actions)
 
-print(type(states))
+np.savez("hi", **numpy_dict)
+
