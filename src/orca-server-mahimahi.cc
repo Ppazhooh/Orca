@@ -71,10 +71,10 @@ int main(int argc, char **argv)
 
     start_server(flow_num, client_port);
 	DBGMARK(DBGSERVER,5,"DONE!\n");
-    shmdt(shared_memory);
-    shmctl(shmid, IPC_RMID, NULL);
-    shmdt(shared_memory_rl);
-    shmctl(shmid_rl, IPC_RMID, NULL);
+    // shmdt(shared_memory);
+    // shmctl(shmid, IPC_RMID, NULL);
+    // shmdt(shared_memory_rl);
+    // shmctl(shmid_rl, IPC_RMID, NULL);
     return 0;
 }
 
@@ -149,11 +149,7 @@ void start_server(int flow_num, int client_port)
     char cmd[1000];
     char final_cmd[1000];
 
-    if (first_time==4 || first_time==2)
-        sprintf(cmd, "sudo -u `whoami`   mm-delay %d mm-link %s/../traces/%s %s/../traces/%s --downlink-log=%s/log/down-%s --uplink-queue=droptail --uplink-queue-args=\"packets=%d\" --downlink-queue=droptail --downlink-queue-args=\"packets=%d\" -- sh -c \'%s\' &",delay_ms,path,uplink,path,downlink,path,log_file,qsize,qsize,container_cmd);
-    else
-        sprintf(cmd, "sudo -u `whoami`  mm-delay %d mm-link %s/../traces/%s %s/../traces/%s --uplink-queue=droptail --uplink-queue-args=\"packets=%d\" --downlink-queue=droptail --downlink-queue-args=\"packets=%d\" -- sh -c \'%s\' &",delay_ms,path,uplink,path,downlink,qsize,qsize,container_cmd);
-    
+    sprintf(cmd, "sudo -u `whoami`   mm-delay %d mm-link %s/traces/%s %s/traces/%s --downlink-log=%s/log/down-%s --uplink-queue=droptail --uplink-queue-args=\"packets=%d\" --downlink-queue=droptail --downlink-queue-args=\"packets=%d\" -- sh -c \'%s\' &",delay_ms,path,uplink,path,downlink,path,log_file,qsize,qsize,container_cmd);
     sprintf(final_cmd,"%s",cmd);
 
     DBGPRINT(DBGSERVER,0,"%s\n",final_cmd);
@@ -162,83 +158,84 @@ void start_server(int flow_num, int client_port)
     /**
      *Setup Shared Memory
      */ 
-    key=(key_t) (actor_id*10000+rand()%10000+1);
-    key_rl=(key_t) (actor_id*10000+rand()%10000+1);
+    
+    // key=(key_t) (actor_id*10000+rand()%10000+1);
+    // key_rl=(key_t) (actor_id*10000+rand()%10000+1);
     // Setup shared memory, 11 is the size
-    if ((shmid = shmget(key, shmem_size, IPC_CREAT | 0666)) < 0)
-    {
-        printf("Error getting shared memory id");
-        return;
-    }
-        // Attached shared memory
-    if ((shared_memory = (char*)shmat(shmid, NULL, 0)) == (char *) -1)
-    {
-        printf("Error attaching shared memory id");
-        return;
-    }
-    // Setup shared memory, 11 is the size
-    if ((shmid_rl = shmget(key_rl, shmem_size, IPC_CREAT | 0666)) < 0)
-    {
-        printf("Error getting shared memory id");
-        return;
-    }
-    // Attached shared memory
-    if ((shared_memory_rl = (char*)shmat(shmid_rl, NULL, 0)) == (char *) -1)
-    {
-        printf("Error attaching shared memory id");
-        return;
-    } 
-    if (first_time==1){
-        sprintf(cmd,"/home/`whoami`/venv/bin/python %s/d5.py --tb_interval=1 --base_path=%s --task=%d --job_name=actor --train_dir=%s --mem_r=%d --mem_w=%d &",path,path,actor_id,path,(int)key,(int)key_rl);
-        DBGPRINT(0,0,"Starting RL Module (Without load) ...\n%s",cmd);
-    }
-    else if (first_time==2 || first_time==4){
-        sprintf(cmd,"/home/`whoami`/venv/bin/python %s/d5.py --tb_interval=1 --base_path=%s --load --eval --task=%d --job_name=actor --train_dir=%s  --mem_r=%d --mem_w=%d &",path,path,actor_id,path,(int)key,(int)key_rl);
-        DBGPRINT(0,0,"Starting RL Module (No learning) ...\n%s",cmd);
-    }
-    else
-    {
-        sprintf(cmd,"/home/`whoami`/venv/bin/python %s/d5.py --load --tb_interval=1 --base_path=%s --task=%d --job_name=actor --train_dir=%s  --mem_r=%d --mem_w=%d &",path,path,actor_id,path,(int)key,(int)key_rl);
-        DBGPRINT(0,0,"Starting RL Module (With load) ...\n%s",cmd);
-    }
+    // if ((shmid = shmget(key, shmem_size, IPC_CREAT | 0666)) < 0)
+    // {
+    //     printf("Error getting shared memory id");
+    //     return;
+    // }
+    //     // Attached shared memory
+    // if ((shared_memory = (char*)shmat(shmid, NULL, 0)) == (char *) -1)
+    // {
+    //     printf("Error attaching shared memory id");
+    //     return;
+    // }
+    // // Setup shared memory, 11 is the size
+    // if ((shmid_rl = shmget(key_rl, shmem_size, IPC_CREAT | 0666)) < 0)
+    // {
+    //     printf("Error getting shared memory id");
+    //     return;
+    // }
+    // // Attached shared memory
+    // if ((shared_memory_rl = (char*)shmat(shmid_rl, NULL, 0)) == (char *) -1)
+    // {
+    //     printf("Error attaching shared memory id");
+    //     return;
+    // } 
+    // if (first_time==1){
+    //     sprintf(cmd,"/home/`whoami`/venv/bin/python %s/d5.py --tb_interval=1 --base_path=%s --task=%d --job_name=actor --train_dir=%s --mem_r=%d --mem_w=%d &",path,path,actor_id,path,(int)key,(int)key_rl);
+    //     DBGPRINT(0,0,"Starting RL Module (Without load) ...\n%s",cmd);
+    // }
+    // else if (first_time==2 || first_time==4){
+    //     sprintf(cmd,"/home/`whoami`/venv/bin/python %s/d5.py --tb_interval=1 --base_path=%s --load --eval --task=%d --job_name=actor --train_dir=%s  --mem_r=%d --mem_w=%d &",path,path,actor_id,path,(int)key,(int)key_rl);
+    //     DBGPRINT(0,0,"Starting RL Module (No learning) ...\n%s",cmd);
+    // }
+    // else
+    // {
+    //     sprintf(cmd,"/home/`whoami`/venv/bin/python %s/d5.py --load --tb_interval=1 --base_path=%s --task=%d --job_name=actor --train_dir=%s  --mem_r=%d --mem_w=%d &",path,path,actor_id,path,(int)key,(int)key_rl);
+    //     DBGPRINT(0,0,"Starting RL Module (With load) ...\n%s",cmd);
+    // }
  
     initial_timestamp();
     system(cmd);
     //Wait to get OK signal (alpha=OK_SIGNAL)
-    bool got_ready_signal_from_rl=false;
+   // bool got_ready_signal_from_rl=false;
     int signal;
     char *num;
     char*alpha;
     char *save_ptr;
     int signal_check_counter=0;
-    while(!got_ready_signal_from_rl)
-    {
-        //Get alpha from RL-Module
-        signal_check_counter++;
-        num=strtok_r(shared_memory_rl," ",&save_ptr);
-        alpha=strtok_r(NULL," ",&save_ptr);
-        if(num!=NULL && alpha!=NULL)
-        {
-           signal=atoi(alpha);      
-           if(signal==OK_SIGNAL)
-           {
-              got_ready_signal_from_rl=true;
-           }
-           else{
-               usleep(1000);
-           }
-        }
-        else{
-           usleep(10000);
-        }
-        if (signal_check_counter>18000)
-        {
-            DBGERROR("After 3 minutes, no response (OK_Signal) from the Actor %d is received! We are going down down down ...\n",actor_id);
-            return;
-        }   
-    }
-    DBGPRINT(0,0,"RL Module is Ready. Let's Start ...\n\n");    
-    usleep(actor_id*10000+10000);
+    // while(!got_ready_signal_from_rl)
+    // {
+    //     //Get alpha from RL-Module
+    //     signal_check_counter++;
+    //     num=strtok_r(shared_memory_rl," ",&save_ptr);
+    //     alpha=strtok_r(NULL," ",&save_ptr);
+    //     if(num!=NULL && alpha!=NULL)
+    //     {
+    //        signal=atoi(alpha);      
+    //        if(signal==OK_SIGNAL)
+    //        {
+    //           got_ready_signal_from_rl=true;
+    //        }
+    //        else{
+    //            usleep(1000);
+    //        }
+    //     }
+    //     else{
+    //        usleep(10000);
+    //     }
+    //     if (signal_check_counter>18000)
+    //     {
+    //         DBGERROR("After 3 minutes, no response (OK_Signal) from the Actor %d is received! We are going down down down ...\n",actor_id);
+    //         return;
+    //     }   
+    // }
+    // DBGPRINT(0,0,"RL Module is Ready. Let's Start ...\n\n");    
+    // usleep(actor_id*10000+10000);
     //Now its time to start the server-client app and tune C2TCP socket.
     system(final_cmd);
         
@@ -390,11 +387,11 @@ void* CntThread(void* information)
         //Enable orca on this socket:
         //TCP_ORCA_ENABLE
         int enable_orca=2;
-        if (setsockopt(sock_for_cnt[i], IPPROTO_TCP, TCP_ORCA_ENABLE, &enable_orca, sizeof(enable_orca)) < 0) 
-        {
-            DBGERROR("CHECK KERNEL VERSION (0514+) ;CANNOT ENABLE ORCA %s\n",strerror(errno));
-            return ((void* )0);
-        } 
+        // if (setsockopt(sock_for_cnt[i], IPPROTO_TCP, TCP_ORCA_ENABLE, &enable_orca, sizeof(enable_orca)) < 0) 
+        // {
+        //     DBGERROR("CHECK KERNEL VERSION (0514+) ;CANNOT ENABLE ORCA %s\n",strerror(errno));
+        //     return ((void* )0);
+        // } 
     }
     char message[1000];
     char *num;
@@ -404,11 +401,12 @@ void* CntThread(void* information)
     uint64_t t0,t1;
     t0=timestamp();
     //Time to start the Logic
-    struct tcp_orca_info tcp_info_pre;
-    tcp_info_pre.init();
+
     int get_info_error_counter=0;
     int actor_is_dead_counter=0;
     int tmp_step=0;
+
+
     while(send_traffic)  
 	{
        for(int i=0;i<flow_index;i++)
@@ -417,155 +415,133 @@ void* CntThread(void* information)
            usleep(report_period*1000);
            while(!got_no_zero && send_traffic)
            {
-                ret1= get_orca_info(sock_for_cnt[i],&orca_info);
+
+                // ret1= get_orca_info(sock_for_cnt[i],&orca_info);
+                ret1= get_my_tcp_info(sock_for_cnt[i],&parsa_tcp_info);
                 if(ret1<0)
                 {
                     DBGMARK(0,0,"setsockopt: for index:%d flow_index:%d TCP_C2TCP ... %s (ret1:%d)\n",i,flow_index,strerror(errno),ret1);
                     return((void *)0);
                 }
-                if(orca_info.avg_urtt>0)
-                {
-                    t1=timestamp();
+               
+
+                // usleep(report_period*100);
+
+                
+
+
+
+                
+                // if(orca_info.avg_urtt>0)
+                // {
+                //     t1=timestamp();
                     
-                    double time_delta=(double)(t1-t0)/1000000.0;
-                    double delay=(double)orca_info.avg_urtt/1000.0;
-                    min_rtt_=(double)(orca_info.min_rtt/1000.0);
-                    lost_bytes=(double)(orca_info.lost_bytes);
-                    pacing_rate=(double)(orca_info.pacing_rate);
-                    lost_rate=lost_bytes/time_delta;   //Rate in MBps
-                    srtt_ms=(double)((orca_info.srtt_us>>3)/1000.0);
-                    snd_ssthresh=(double)(orca_info.snd_ssthresh);
-                    packets_out=(double)(orca_info.packets_out);
-                    retrans_out=(double)(orca_info.retrans_out);
-                    max_packets_out=(double)(orca_info.max_packets_out);
+                //     double time_delta=(double)(t1-t0)/1000000.0;
+                //     double delay=(double)orca_info.avg_urtt/1000.0;
+                //     min_rtt_=(double)(orca_info.min_rtt/1000.0);
+                //     lost_bytes=(double)(orca_info.lost_bytes);
+                //     pacing_rate=(double)(orca_info.pacing_rate);
+                //     lost_rate=lost_bytes/time_delta;   //Rate in MBps
+                //     srtt_ms=(double)((orca_info.srtt_us>>3)/1000.0);
+                //     snd_ssthresh=(double)(orca_info.snd_ssthresh);
+                //     packets_out=(double)(orca_info.packets_out);
+                //     retrans_out=(double)(orca_info.retrans_out);
+                //     max_packets_out=(double)(orca_info.max_packets_out);
 
-                    report_period=20;
-                    if (!slow_start_passed)
-                        //Just for the first Time
-                        slow_start_passed=(orca_info.snd_ssthresh<orca_info.cwnd)?1:0;
+                //     report_period=20;
+                //     if (!slow_start_passed)
+                //         //Just for the first Time
+                //         slow_start_passed=(orca_info.snd_ssthresh<orca_info.cwnd)?1:0;
 
-                    if(!slow_start_passed)
-                    {
-                        //got_no_zero=1;
-                        tcp_info_pre=orca_info;
-                        t0=timestamp();
+                //     if(!slow_start_passed)
+                //     {
+                //         //got_no_zero=1;
+                //         tcp_info_pre=orca_info;
+                //         t0=timestamp();
 
-                        target_ratio=1.1*orca_info.cwnd;
-                        ret1 = setsockopt(sock_for_cnt[i], IPPROTO_TCP,TCP_CWND, &target_ratio,sizeof(target_ratio));
-                        if(ret1<0)
-                        {
-                           DBGPRINT(0,0,"setsockopt: for index:%d flow_index:%d ... %s (ret1:%d)\n",i,          flow_index,strerror(errno),ret1);
-                           return((void *)0);
-                        }
-                        continue;
-                    }
-                    sprintf(message,"%d %.7f %.7f %.7f %.7f %.7f %.7f %.7f %.7f %.7f %.7f %.7f %.7f %.7f %.7f %.7f",
-                            msg_id,delay,(double)orca_info.thr,(double)orca_info.cnt,(double)time_delta,
-                            (double)target,(double)orca_info.cwnd, pacing_rate,lost_rate,srtt_ms,snd_ssthresh,packets_out
-                            ,retrans_out,max_packets_out,(double)orca_info.mss,min_rtt_);
-                    memcpy(shared_memory,message,sizeof(message));
-                    if ((duration_steps!=0))
-                    {
-                        step_it++;
-                        if(step_it>duration_steps)
-                            send_traffic=false;
-                    }
+                //         target_ratio=1.1*orca_info.cwnd;
+                //         ret1 = setsockopt(sock_for_cnt[i], IPPROTO_TCP,TCP_CWND, &target_ratio,sizeof(target_ratio));
+                //         if(ret1<0)
+                //         {
+                //            DBGPRINT(0,0,"setsockopt: for index:%d flow_index:%d ... %s (ret1:%d)\n",i,          flow_index,strerror(errno),ret1);
+                //            return((void *)0);
+                //         }
+                //         continue;
+                //     }
+            uint64_t now;
+            now=timestamp();
+            sprintf(message,"%lu %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u\n ",
+            now,
+			parsa_tcp_info.tcpi_state,
+            parsa_tcp_info.tcpi_ca_state,
+            parsa_tcp_info.tcpi_retransmits,
+            parsa_tcp_info.tcpi_probes,
+            parsa_tcp_info.tcpi_backoff,
+            parsa_tcp_info.tcpi_options,
+            parsa_tcp_info.tcpi_snd_wscale,
+            parsa_tcp_info.tcpi_rcv_wscale,
+            parsa_tcp_info.tcpi_rto,
+            parsa_tcp_info.tcpi_ato,
+            parsa_tcp_info.tcpi_snd_mss,
+            parsa_tcp_info.tcpi_rcv_mss,
+            parsa_tcp_info.tcpi_unacked,
+            parsa_tcp_info.tcpi_sacked,
+            parsa_tcp_info.tcpi_lost,
+            parsa_tcp_info.tcpi_retrans,
+            parsa_tcp_info.tcpi_fackets,
+            parsa_tcp_info.tcpi_last_data_sent,
+            parsa_tcp_info.tcpi_last_ack_sent,
+            parsa_tcp_info.tcpi_last_data_recv,
+            parsa_tcp_info.tcpi_last_ack_recv,
+            parsa_tcp_info.tcpi_pmtu,
+            parsa_tcp_info.tcpi_rcv_ssthresh,
+            parsa_tcp_info.tcpi_rtt,
+            parsa_tcp_info.tcpi_rttvar,
+            parsa_tcp_info.tcpi_snd_ssthresh,
+            parsa_tcp_info.tcpi_snd_cwnd,
+            parsa_tcp_info.tcpi_advmss,
+            parsa_tcp_info.tcpi_reordering);
+
+            
+            char to_save[1000];
+
+            memcpy(to_save,message,sizeof(message));
+            printf("%s", to_save);
+            
+                //     if ((duration_steps!=0))
+                //     {
+                //         step_it++;
+                //         if(step_it>duration_steps)
+                //             send_traffic=false;
+                //     }
                     
-                    msg_id=(msg_id+1)%1000;
-                    DBGPRINT(DBGSERVER,1,"%s\n",message);
-                    got_no_zero=1;
-                    tcp_info_pre=orca_info;
-                    t0=timestamp();
-                    get_info_error_counter=0;
-                }
-                else
-                {
-                    get_info_error_counter++;
-                    if(get_info_error_counter>30000)
-                    {
-                        DBGMARK(0,0,"No valid state for 1 min. We (server of Actor %d) are going down down down ...\n",actor_id);
-                        send_traffic=false;
-                    }
-                    usleep(report_period*100);
-                }
+                //     msg_id=(msg_id+1)%1000;
+                //     DBGPRINT(DBGSERVER,1,"%s\n",message);
+                //     got_no_zero=1;
+                //     tcp_info_pre=orca_info;
+                //     t0=timestamp();
+                //     get_info_error_counter=0;
+                // }
+                // else
+                // {
+                //     get_info_error_counter++;
+                //     if(get_info_error_counter>30000)
+                //     {
+                //         DBGMARK(0,0,"No valid state for 1 min. We (server of Actor %d) are going down down down ...\n",actor_id);
+                //         send_traffic=false;
+                //     }
+                //     usleep(report_period*100);
+                // }
            }
-        got_alpha=false;
-        int error_cnt=0;
-        int error2_cnt=0;
-        while(!got_alpha && send_traffic)
-        { 
-           //Get alpha from RL-Module
-           num=strtok_r(shared_memory_rl," ",&save_ptr);
-           alpha=strtok_r(NULL," ",&save_ptr);
-           if(num!=NULL && alpha!=NULL)
-           {
-               pre_id_tmp=atoi(num);
-               target_ratio=atoi(alpha);
-               if(pre_id!=pre_id_tmp /*&& target_ratio!=OK_SIGNAL*/)
-               {
-                  got_alpha=true; 
-                  pre_id=pre_id_tmp; 
-                  target_ratio=atoi(alpha)*orca_info.cwnd/100;
-                  
-                  if (target_ratio<MIN_CWND)
-                      target_ratio=MIN_CWND;
-
-                  ret1 = setsockopt(sock_for_cnt[i], IPPROTO_TCP,TCP_CWND, &target_ratio, sizeof(target_ratio));
-                  if(ret1<0)
-                  {
-                      DBGPRINT(0,0,"setsockopt: for index:%d flow_index:%d ... %s (ret1:%d)\n",i,flow_index,strerror(errno),ret1);
-                      return((void *)0);
-                  }
-                  error_cnt=0;
-               }
-               else{
-                   if (error_cnt>1000)
-                   {
-                       DBGPRINT(DBGSERVER,0,"still no new value id:%d prev_id:%d\n",pre_id_tmp,pre_id);
-                       error_cnt=0;
-                   }
-                   error_cnt++;
-                   usleep(1000);
-               }
-               error2_cnt=0;
-           }
-           else{
-                if (error2_cnt==50)
-                {
-                    DBGPRINT(0,0,"got null values: (downlink:%s delay:%d qs:%d) Actor: %d iteration:%d\n",downlink,delay_ms,qsize,actor_id,step_it);
-                    //FIXME:
-                    //A Hack for now! Let's send a new state to get new action in case we have missed previous action. Why it happens?!
-                    if((1+tmp_step)==(step_it))
-                    {
-                        actor_is_dead_counter++;
-                        tmp_step=step_it;
-                        if(actor_is_dead_counter>120)
-                        {
-                            DBGMARK(0,0,"No valid action for 1 min. We (server of actor %d) are going down down down ...\n",actor_id);
-                            send_traffic=false;
-                        }
-                    }
-                    else
-                    {
-                        actor_is_dead_counter=0;
-                        tmp_step=step_it;
-                    }
-                    got_alpha=true; 
-                    error2_cnt=0;
-                }
-                else{ 
-                    error2_cnt++;
-                    usleep(10000);
-                }
-           }
-        }
+        
+        // }
      
        }
     }
-    shmdt(shared_memory);
-    shmctl(shmid, IPC_RMID, NULL);
-    shmdt(shared_memory_rl);
-    shmctl(shmid_rl, IPC_RMID, NULL);
+    // shmdt(shared_memory);
+    // shmctl(shmid, IPC_RMID, NULL);
+    // shmdt(shared_memory_rl);
+    // shmctl(shmid_rl, IPC_RMID, NULL);
     return((void *)0);
 }
 void* DataThread(void* info)
