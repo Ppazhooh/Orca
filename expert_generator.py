@@ -1,7 +1,11 @@
-with open('a.txt') as f:
+import pandas as pd
+import numpy as np
+
+with open('b.txt') as f:
     lines = f.readlines()
     lines = [line.rstrip() for line in lines]
-lines=lines[11:]
+#lines=lines[11:]
+
 
 
 states=[]
@@ -11,8 +15,18 @@ for i in range(len(lines)):
     row=lines[i].split(' ')
     row=row[1:]
     temp=row
-    if (row[0].isdigit() &len(row)>27):
-        temp.pop(27)
-        actions.append(row[27])
-        states.append(temp)
+    if (len(row)>27):
+        if(row[0].isdigit()):
+            actions.append(row[27])
+            temp.pop(27)
+            states.append(temp)
+
+
     
+states=np.array(states)
+actions=np.array(actions)
+
+
+np.savez("hi", states=states, actions=actions)
+
+print(type(states))
