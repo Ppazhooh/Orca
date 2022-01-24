@@ -1,4 +1,5 @@
 import numpy as np
-data=np.load('expert_cartpole.npz')
+data=np.load('hi.npz')
 obs=data['obs']
 print(type(data))
+print(type(obs))
