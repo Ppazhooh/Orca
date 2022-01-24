@@ -26,13 +26,23 @@ for i in range(len(lines)):
 states=np.array(states)
 actions=np.array(actions)
 
+
+
+rewards=np.zeros((len(actions),))
+
+episode_returns=np.zeros((100,))
+episode_starts=np.zeros((len(actions),))
+
 numpy_dict = {
         'actions': actions,
         'obs': states,
-        # 'rewards': rewards,
-        # 'episode_returns': episode_returns,
-        # 'episode_starts': episode_starts
+        'rewards': rewards,
+        'episode_returns': episode_returns,
+        'episode_starts': episode_starts
     }
+
+
+
 
 
 np.savez("hi", **numpy_dict)
